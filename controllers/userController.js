@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt-nodejs')
 const db = require('../models')
 const User = db.User
+const Tweet = db.Tweet
 
 const userController = {
   signUpPage: (req, res) => {
@@ -45,6 +46,16 @@ const userController = {
     req.flash('success_messages', '登出成功！')
     req.logout()
     res.redirect('/signin')
+  },
+  getUser: (req, res) => {
+    return User.findByPk(req.params.id, { include: Tweet }).then(user => {
+      if (req.user.id !== Number(req.params.id)) {
+        req.flash('error_messages', '您無權編輯他人檔案')
+        return res.redirect(`/users/${req.params.id}/tweets`)
+      }
+      // console.log(user.Tweets[0])
+      return res.render('profile')
+    })
   }
 }
 
