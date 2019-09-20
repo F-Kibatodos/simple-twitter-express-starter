@@ -2,16 +2,17 @@
 <div class="row">
   <div class="left col-md-8">
     <h2>Tweets Left</h2>
-    <textarea class="form-control rounded-0" name="newTweet" id="newTweet" rows="5" maxlength="140" required
-      placeholder="What's on your mind?"></textarea>
-    <a href="#" class="float-right my-2">
-      <button type="button" class="btn btn-primary">Tweet</button>
-    </a>
+    <form action="/tweets" method="POST">
+      <textarea class="form-control rounded-0" name="newTweet" id="newTweet" rows="5" maxlength="140" required
+        placeholder="What's on your mind?"></textarea>
+      <button class="btn btn-primary float-right" type="submit">Tweet</button>
+    </form>
     <table class="table table-sm table-borderless">
       <tbody>
         {{#each tweets}}
-        <tr style="border: 1px solid #ccc">
-          <td style="margin-bottom: 5px">
+        <tr>
+          <td>{{this.id}}</td>
+          <td>
             <p>{{moment this.updatedAt}}</p>
             <p>{{this.description}}</p>
             <p>

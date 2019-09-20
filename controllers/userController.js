@@ -50,33 +50,32 @@ const userController = {
     res.redirect('/signin')
   },
   getUser: (req, res) => {
-    return User.findByPk(req.params.id, { include: Tweet }).then(user => {
-      if (req.user.id !== Number(req.params.id)) {
-        req.flash('error_messages', '您無權編輯他人檔案')
-        return res.redirect(`/users/${req.params.id}/tweets`)
-      }
-      return res.render('profile')
+    return User.findByPk(req.params.id, {
+      include: [{ model: Tweet }],
+      order: [[{ model: Tweet }, 'createdAt', 'DESC']]
+    }).then(user => {
+      return res.render('profile', { profile: user })
     })
   },
   editUser: (req, res) => {
-    return User.findByPk(req.params.id).then(user => {
-      if (req.user.id !== Number(req.params.id)) {
-        req.flash('error_messages', '您無權編輯他人檔案')
-        return res.redirect(`/users/${req.params.id}/tweets`)
-      }
-      return res.render('edit')
-    })
+    if (Number(req.params.id) !== req.user.id) {
+      req.flash('error_messages', '您無權編輯他人檔案')
+      return res.redirect(`/users/${req.params.id}/tweets`)
+    } else {
+      return User.findByPk(req.params.id).then(user => {
+        return res.render('edit')
+      })
+    }
   },
   putUser: (req, res) => {
+    if (Number(req.params.id) !== Number(req.user.id)) {
+      req.flash('error_messages', '您無權編輯他人檔案')
+      return res.redirect(`/users/${req.params.id}/tweets`)
+    }
     if (!req.body.name) {
       req.flash('error_messages', "name didn't exist")
       return res.redirect('back')
     }
-    if (Number(req.params.id) !== Number(req.user.id)) {
-      req.flash({ status: 'error', message: 'permission denied' })
-      return res.redirect('back')
-    }
-
     const { file } = req
     if (file) {
       imgur.setClientID(IMGUR_CLIENT_ID)

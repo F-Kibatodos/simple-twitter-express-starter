@@ -4,9 +4,20 @@ const adminController = require('../controllers/adminController.js')
 const multer = require('multer')
 const upload = multer({ dest: 'temp/' })
 
+// authenticate the identity first
 const authenticated = (req, res, next) => {
   if (req.isAuthenticated()) {
     return next()
+  }
+  res.redirect('/signin')
+}
+
+const authenticatedAdmin = (req, res, next) => {
+  if (req.isAuthenticated()) {
+    if (req.user.role === 'admin') {
+      return next()
+    }
+    return res.redirect('/')
   }
   res.redirect('/signin')
 }
@@ -24,9 +35,13 @@ module.exports = (app, passport) => {
   app.get('/admin', (req, res) => {
     res.redirect('/admin/tweets')
   })
-  app.get('/admin/tweets', adminController.getTweets)
-  app.delete('/admin/tweets/:id', adminController.deleteTweet)
-  // app.get('/admin/users', adminController.getUsers)
+  app.get('/admin/tweets', authenticatedAdmin, adminController.getTweets)
+  app.delete(
+    '/admin/tweets/:id',
+    authenticatedAdmin,
+    adminController.deleteTweet
+  )
+  app.get('/admin/users', authenticatedAdmin, adminController.getUsers)
   app.get('/signin', userController.signInPage)
   app.post(
     '/signin',
@@ -39,7 +54,7 @@ module.exports = (app, passport) => {
   app.get('/logout', userController.logout)
   app.get('/users/:id/tweets', authenticated, userController.getUser)
   app.get('/users/:id/edit', authenticated, userController.editUser)
-  app.put(
+  app.post(
     '/users/:id/edit',
     authenticated,
     upload.single('avatar'),
