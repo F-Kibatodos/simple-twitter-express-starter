@@ -28,6 +28,8 @@ module.exports = (app, passport) => {
   })
   app.get('/tweets', authenticated, tweetController.getTweets)
   app.post('/tweets', authenticated, tweetController.postTweet)
+  app.get('/tweets/:id/replies', authenticated, tweetController.getTweetReplies)
+  app.post('/tweets/:id/replies', authenticated, tweetController.postReply)
   app.get('/signup', userController.signUpPage)
   app.post('/signup', userController.signUp)
   // 後台
@@ -52,6 +54,7 @@ module.exports = (app, passport) => {
     userController.signIn
   )
   app.get('/logout', userController.logout)
+  app.get('/users/:id/likes', authenticated, userController.getLikes)
   app.get('/users/:id/tweets', authenticated, userController.getUser)
   app.get('/users/:id/edit', authenticated, userController.editUser)
   app.post(
@@ -60,4 +63,15 @@ module.exports = (app, passport) => {
     upload.single('avatar'),
     userController.putUser
   )
+  app.post('/tweets/:id/like', authenticated, userController.addLike)
+  app.post('/tweets/:id/unlike', authenticated, userController.removeLike)
+  app.post('/followships', authenticated, userController.addFollowing)
+
+  app.delete(
+    '/followships/:followingId',
+    authenticated,
+    userController.removeFollowing
+  )
+  app.get('/users/:id/followings', authenticated, userController.getFollowings)
+  app.get('/users/:id/followers', authenticated, userController.getFollowers)
 }

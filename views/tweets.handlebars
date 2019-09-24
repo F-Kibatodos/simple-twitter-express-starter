@@ -1,32 +1,89 @@
 <!--views/tweets.handlebars-->
-<div class="row">
+<div class="row mt-4">
   <div class="left col-md-8">
-    <h2>Tweets Left</h2>
     <form action="/tweets" method="POST">
       <textarea class="form-control rounded-0" name="newTweet" id="newTweet" rows="5" maxlength="140" required
         placeholder="What's on your mind?"></textarea>
-      <button class="btn btn-primary float-right" type="submit">Tweet</button>
+      <button class="btn btn-primary float-right mt-3" type="submit">Tweet</button>
     </form>
     <table class="table table-sm table-borderless">
       <tbody>
         {{#each tweets}}
         <tr>
-          <td>{{this.id}}</td>
+          <td><img src="{{this.User.avatar}}" alt="{{this.User.name}}" style="width: 100px"></td>
           <td>
-            <p>{{moment this.updatedAt}}</p>
+            <p><a href="/users/{{this.User.id}}/tweets">@{{this.User.name}}</a> {{moment this.createdAt}}</p>
             <p>{{this.description}}</p>
-            <p>
-              <a href="#">Reply</a>
-              <a href="#">Like</a>
-            </p>
+            <span>
+              <a class="text-primary mr-3" href="/tweets/{{this.id}}/replies"><i
+                  class="far fa-comment"></i>({{this.replyCount}})</a>
+              {{#if this.isLiked}}
+              <form action="/tweets/{{this.id}}/unlike" method="POST" style="display: inline-block">
+                <button type="submit" class="btn btn-link" style="text-decoration:none"><i
+                    class=" fas fa-thumbs-up"></i>({{this.totalLikedUsers}})</button>
+              </form>
+              {{else}}
+              <form action="/tweets/{{this.id}}/like" method="POST" style="display:inline-block">
+                <button type="submit" class="btn btn-link" style="text-decoration:none"><i
+                    class="far fa-thumbs-up"></i>({{this.totalLikedUsers}})</button>
+              </form>
+              {{/if}}
+            </span>
           </td>
         </tr>
         {{/each}}
       </tbody>
     </table>
+    <nav aria-label="Page navigation example">
+      <ul class="pagination">
+        <li class="page-item">
+          <a class="page-link" href="/tweets?page={{prev}}" aria-label="Previous">
+            <span aria-hidden="true">&laquo;</span>
+          </a>
+        </li>
+        {{#each totalPage}}
+        {{#ifCond this ../page}}
+        <li class="page-item active"><a class="page-link" href="#">{{this}}</a></li>
+        {{else}}
+        <li class="page-item"><a class="page-link" href="/tweets?page={{this}}">{{this}}</a></li>
+        {{/ifCond}}
+        {{/each}}
+        <a class="page-link" href="/tweets?page={{next}}" aria-label="Next">
+          <span aria-hidden="true">&raquo;</span>
+        </a>
+        </li>
+      </ul>
   </div>
 
+
   <div class="right col-md-4">
-    <h3>Tweets Right</h3>
+    <h3>Popular</h3>
+    {{#each topFollowers}}
+    <div class="card mb-3">
+      <div class="card-body row">
+        <div class="col-md-3">
+          <img src="{{this.avatar}}" alt="{{this.name}}" style="width: 50px">
+        </div>
+        <div class="col-md-9">
+          <p><a href="/users/{{this.id}}/tweets">@{{this.name}}</a></p>
+          <p>{{this.introduction}}</p>
+          {{#ifCond this.id ../user.id}}
+          <a href="/users/{{this.id}}/tweets" class="float-right"><button class="btn btn-primary">Edit
+              Profile({{this.totalFollowers}})</button></a>
+          {{else}}
+          {{#if this.isFollowed }}
+          <form action="/followships/{{this.id}}?_method=DELETE" method="POST"><button type="submit"
+              class="btn btn-danger float-right">UnFollow({{this.totalFollowers}})</button></form>
+          {{else}}
+          <form action="/followships" method="POST">
+            <button type="submit" class="btn btn-primary float-right" name="id"
+              value={{this.id}}>Follow({{this.totalFollowers}})</button>
+          </form>
+          {{/if}}
+          {{/ifCond}}
+        </div>
+      </div>
+    </div>
+    {{/each}}
   </div>
 </div>
